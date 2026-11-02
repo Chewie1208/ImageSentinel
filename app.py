@@ -6,6 +6,23 @@ from datetime import datetime
 import threading
 import os
 import json
+import sys
+from pathlib import Path
+
+from pathlib import Path
+import json
+
+def resource_path(relative_path):
+
+    try:
+        base_path = Path(sys._MEIPASS)
+
+    except Exception:
+        base_path = Path(__file__).parent
+
+    return base_path / relative_path
+
+
 
 class ImageSentinelApp:
 
@@ -568,7 +585,9 @@ class ImageSentinelApp:
         )
 
         logo_image = Image.open(
-            "assets\logo.png"
+            resource_path(
+                "assets/logo.png"
+            )
         )
 
         self.logo = ctk.CTkImage(
@@ -702,86 +721,88 @@ class ImageSentinelApp:
 
     def load_settings(self):
 
+        settings_file = "settings.json"
+
+        default_source = (
+            Path.home() / "Pictures"
+        )
+
+        default_results = Path(
+            "C:/Temp/ImageSentinelResults"
+        )
+
+        default_results.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        settings = {
+
+            "source_folder": str(
+                default_source
+            ),
+
+            "results_folder": str(
+                default_results
+            ),
+
+            "threshold": "0.70"
+
+        }
+
         try:
 
-            with open(
-                "settings.json",
-                "r"
-            ) as f:
+            if Path(settings_file).exists():
 
-                settings = json.load(f)
+                with open(
+                    settings_file,
+                    "r",
+                    encoding="utf-8"
+                ) as f:
 
-            self.source_entry.delete(
-                0,
-                "end"
-            )
+                    settings.update(
+                        json.load(f)
+                    )
 
-            self.source_entry.insert(
-                0,
-                settings.get(
-                    "source_folder",
-                    ""
-                )
-            )
+        except Exception:
 
-            self.results_entry.delete(
-                0,
-                "end"
-            )
+            pass
 
-            self.results_entry.insert(
-                0,
-                settings.get(
-                    "results_folder",
-                    ""
-                )
-            )
+        self.source_entry.delete(
+            0,
+            "end"
+        )
 
-            self.threshold_entry.delete(
-                0,
-                "end"
-            )
+        self.source_entry.insert(
+            0,
+            settings["source_folder"]
+        )
 
-            self.threshold_entry.insert(
-                0,
+        self.results_entry.delete(
+            0,
+            "end"
+        )
+
+        self.results_entry.insert(
+            0,
+            settings["results_folder"]
+        )
+
+        self.threshold_entry.delete(
+            0,
+            "end"
+        )
+
+        self.threshold_entry.insert(
+            0,
+            str(
                 settings.get(
                     "threshold",
                     "0.70"
                 )
             )
-
-            self.copy_very_high_var.set(
-                settings.get(
-                    "copy_very_high",
-                    False
-                )
-            )
-
-            self.copy_high_var.set(
-                settings.get(
-                    "copy_high",
-                    False
-                )
-            )
-
-            self.copy_medium_var.set(
-                settings.get(
-                    "copy_medium",
-                    False
-                )
-            )
-
-            self.copy_low_var.set(
-                settings.get(
-                    "copy_low",
-                    False
-                )
-            )
-        
-        except FileNotFoundError:
-
-            pass
-        
+        )
+            
     def open_results_folder(self):
 
         folder = self.results_entry.get()
@@ -910,7 +931,7 @@ class ImageSentinelApp:
             )
 
             self.status_label.configure(
-                text="Status: Finshed"
+                text="Status: Finished"
             )
             duration = finish_time - self.scan_start_time
 
@@ -924,7 +945,7 @@ class ImageSentinelApp:
             )
             self.activity_log.insert(
                 "end",
-                f"{timestamp} - NSFW Scanning finished\n"
+                f"{timestamp} - NSFW scanning finished\n"
             )
             self.activity_log.configure(
                 state="disabled"

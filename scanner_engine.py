@@ -148,8 +148,26 @@ def run_scan(
         len(candidates)
     )
 
-    detector = NudeDetector()
+    try:
 
+        callback(
+            "Loading Sentinel AI..."
+        )
+
+        detector = NudeDetector()
+
+        callback(
+            "Sentinel AI loaded"
+        )
+
+    except Exception as ex:
+
+        callback(
+            f"NUDENET ERROR: {ex}"
+        )
+
+        return
+    
     html_path = results_path / "review.html"
     html_rows = []
     detections = []
@@ -341,9 +359,9 @@ def run_scan(
         stats
     )
 
-    callback(
-        f"NSFW Scanning finished"
-    )
+#    callback(
+#        f"NSFW Scanning finished"
+#    )
 
     callback(
         "__SCAN_COMPLETE__"
